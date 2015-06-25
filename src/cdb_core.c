@@ -943,6 +943,7 @@ int cdb_set2(CDB *db, const char *key, int ksize, const char *val, int vsize, in
     uint64_t hash;
     uint32_t lockid;
     bool expired = false;
+    int retval = 0;
  
     if (db->vio == NULL) {
         /* if it is a memdb, just operate on the record cache and return */
@@ -976,6 +977,7 @@ int cdb_set2(CDB *db, const char *key, int ksize, const char *val, int vsize, in
         cval = cdb_ht_get(db->rcache, key, ksize, &item_vsize, false);
         if (cval) {
             /* record already exists */
+            retval = 1;
             ooff = rec.ooff = *(FOFF*)cval;
             rec.osize = item_vsize - SFOFF - SI4;
             old_expire = *(uint32_t*)(cval + SFOFF); 
@@ -1081,7 +1083,7 @@ int cdb_set2(CDB *db, const char *key, int ksize, const char *val, int vsize, in
         _cdb_recout(db);
 
     cdb_seterrno(db, CDB_SUCCESS, __FILE__, __LINE__);
-    return 0;
+    return retval;
 }
 
 
